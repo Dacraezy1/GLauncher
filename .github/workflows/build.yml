@@ -1,0 +1,237 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main, master ]
+
+env:
+  CARGO_TERM_COLOR: always
+  BINARY_NAME: glauncher
+
+jobs:
+  build:
+    name: Build (Linux x86_64)
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y \
+            libgtk-4-dev \
+            libadwaita-1-dev \
+            libgdk-pixbuf-2.0-dev \
+            libpango1.0-dev \
+            libcairo2-dev \
+            libglib2.0-dev \
+            libssl-dev \
+            pkg-config \
+            patchelf \
+            file
+
+      - name: Show GTK4 version
+        run: pkg-config --modversion gtk4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: linux-x86_64-ubuntu24
+
+      - name: Build release binary
+        run: cargo build --release
+
+      - name: Strip and inspect binary
+        run: |
+          strip target/release/${{ env.BINARY_NAME }}
+          ls -lh target/release/${{ env.BINARY_NAME }}
+          file target/release/${{ env.BINARY_NAME }}
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: glauncher-linux-x86_64
+          path: target/release/${{ env.BINARY_NAME }}
+          retention-days: 30
+
+  appimage:
+    name: Build AppImage
+    runs-on: ubuntu-24.04
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y \
+            libgtk-4-dev \
+            libadwaita-1-dev \
+            libgdk-pixbuf-2.0-dev \
+            libpango1.0-dev \
+            libcairo2-dev \
+            libglib2.0-dev \
+            libssl-dev \
+            pkg-config \
+            patchelf \
+            wget \
+            file \
+            libfuse2
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: linux-x86_64-ubuntu24-appimage
+
+      - name: Build release binary
+        run: cargo build --release
+
+      - name: Download appimagetool
+        run: |
+          wget -q \
+            https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage \
+            -O /tmp/appimagetool
+          chmod +x /tmp/appimagetool
+
+      - name: Prepare AppDir
+        run: |
+          mkdir -p AppDir/usr/bin
+          mkdir -p AppDir/usr/share/applications
+          mkdir -p AppDir/usr/share/icons/hicolor/scalable/apps
+
+          cp target/release/${{ env.BINARY_NAME }} AppDir/usr/bin/
+          strip AppDir/usr/bin/${{ env.BINARY_NAME }}
+
+          cp packaging/io.github.Dacraezy1.GLauncher.desktop AppDir/usr/share/applications/
+          cp packaging/io.github.Dacraezy1.GLauncher.desktop AppDir/
+
+          cp assets/icons/io.github.Dacraezy1.GLauncher.svg \
+             AppDir/usr/share/icons/hicolor/scalable/apps/
+          cp assets/icons/io.github.Dacraezy1.GLauncher.svg \
+             AppDir/io.github.Dacraezy1.GLauncher.svg
+
+          cat > AppDir/AppRun << 'APPRUN'
+          #!/bin/sh
+          SELF=$(readlink -f "$0")
+          HERE="${SELF%/*}"
+          export PATH="${HERE}/usr/bin:${PATH}"
+          exec "${HERE}/usr/bin/glauncher" "$@"
+          APPRUN
+          chmod +x AppDir/AppRun
+
+      - name: Build AppImage
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: "1"
+        run: |
+          ARCH=x86_64 /tmp/appimagetool AppDir GLauncher-x86_64.AppImage
+          chmod +x GLauncher-x86_64.AppImage
+
+      - name: Upload AppImage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GLauncher-AppImage-x86_64
+          path: GLauncher-x86_64.AppImage
+          retention-days: 30
+
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-24.04
+    needs: [build, appimage]
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download binary artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: glauncher-linux-x86_64
+          path: release-files/
+
+      - name: Download AppImage artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: GLauncher-AppImage-x86_64
+          path: release-files/
+        continue-on-error: true
+
+      - name: Prepare release files
+        run: |
+          cd release-files
+          mv ${{ env.BINARY_NAME }} glauncher-linux-x86_64 2>/dev/null || true
+          chmod +x glauncher-linux-x86_64 2>/dev/null || true
+          chmod +x GLauncher-x86_64.AppImage 2>/dev/null || true
+          ls -lh
+
+      - name: Generate release notes
+        run: |
+          cat > release_notes.md << 'EOF'
+          ## GLauncher ${{ github.ref_name }}
+
+          A modern, open-source Minecraft Java Edition launcher for Linux — built with Rust + GTK4 + libadwaita.
+
+          ### Downloads
+
+          | File | Description |
+          |------|-------------|
+          | `glauncher-linux-x86_64` | Raw ELF binary (requires `gtk4` + `libadwaita` installed) |
+          | `GLauncher-x86_64.AppImage` | Portable — just `chmod +x` and run |
+
+          ### Quick start — Arch Linux
+          ```sh
+          sudo pacman -S gtk4 libadwaita
+          chmod +x glauncher-linux-x86_64
+          ./glauncher-linux-x86_64
+          ```
+
+          ### Quick start — AppImage (any distro)
+          ```sh
+          chmod +x GLauncher-x86_64.AppImage
+          ./GLauncher-x86_64.AppImage
+          ```
+
+          ### Features
+          - Microsoft account login (Xbox Live → XSTS → Minecraft auth, PKCE)
+          - Offline mode
+          - All Minecraft versions (release, snapshot, beta, alpha)
+          - Fabric, Forge, Quilt, NeoForge support
+          - Modrinth mod browser (search & install)
+          - CurseForge mod browser (requires free API key)
+          - Java 8–24 auto-download via Eclipse Adoptium
+          - JVM tuning: Aikar flags, G1GC, ZGC, Shenandoah presets
+          - Per-instance settings
+          - Native GTK4 / libadwaita UI
+
+          Licensed under GPLv3.
+          EOF
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: GLauncher ${{ github.ref_name }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
+          files: |
+            release-files/glauncher-linux-x86_64
+            release-files/GLauncher-x86_64.AppImage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

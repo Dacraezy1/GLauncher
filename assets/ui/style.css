@@ -1,0 +1,137 @@
+/* ═══════════════════════════════════════════════════
+   GLauncher — GTK4 / Libadwaita custom stylesheet
+   ═══════════════════════════════════════════════════ */
+
+/* ── Sidebar ─────────────────────────────────────── */
+.sidebar {
+  background-color: @sidebar_bg_color;
+  border-right: 1px solid @borders;
+}
+
+.sidebar-logo {
+  padding: 4px 0 4px 0;
+}
+
+.logo-icon {
+  color: @accent_color;
+  opacity: 0.9;
+}
+
+.logo-label {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: @window_fg_color;
+}
+
+/* Nav list — override ListBox defaults */
+.navigation-sidebar {
+  background: transparent;
+  border: none;
+}
+
+.navigation-sidebar row {
+  border-radius: 8px;
+  margin-bottom: 2px;
+}
+
+.navigation-sidebar row:selected {
+  background-color: @accent_color;
+}
+
+.navigation-sidebar row:selected .nav-label,
+.navigation-sidebar row:selected .nav-icon {
+  color: @accent_fg_color;
+}
+
+.nav-label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.nav-icon {
+  opacity: 0.75;
+}
+
+.nav-row:selected .nav-icon {
+  opacity: 1.0;
+}
+
+/* ── Sidebar account area ─────────────────────────── */
+.sidebar-account {
+  background: transparent;
+}
+
+.account-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.account-type {
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+/* ── Page layout ─────────────────────────────────── */
+.page {
+  background-color: @window_bg_color;
+}
+
+.page-header {
+  background-color: @window_bg_color;
+}
+
+/* ── Cards / rows ────────────────────────────────── */
+.instance-quick-row {
+  padding: 8px 4px;
+  border-radius: 10px;
+}
+
+.instance-icon {
+  opacity: 0.7;
+  padding: 4px;
+}
+
+.welcome-card {
+  background: linear-gradient(135deg,
+    alpha(@accent_color, 0.08) 0%,
+    alpha(@accent_color, 0.03) 100%
+  );
+  border: 1px solid alpha(@accent_color, 0.15);
+  border-radius: 12px;
+}
+
+/* ── Log view ───────────────────────────────────── */
+.log-view {
+  font-family: monospace;
+  font-size: 11px;
+  background-color: @card_bg_color;
+  border-radius: 6px;
+  padding: 6px;
+  color: @window_fg_color;
+}
+
+/* ── Tags / badges ──────────────────────────────── */
+.tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background-color: alpha(@window_fg_color, 0.1);
+  color: @window_fg_color;
+}
+
+.tag.success {
+  background-color: alpha(#57e389, 0.2);
+  color: #2ec27e;
+}
+
+/* ── Misc ───────────────────────────────────────── */
+.monospace {
+  font-family: monospace;
+  font-size: 11px;
+}
+
+.error {
+  color: @error_color;
+}

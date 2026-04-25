@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=GLauncher
+Comment=Modern Minecraft Java Edition Launcher
+Exec=glauncher
+Icon=io.github.Dacraezy1.GLauncher
+Terminal=false
+Type=Application
+Categories=Game;
+StartupWMClass=glauncher
+Keywords=minecraft;launcher;java;fabric;forge;
+X-GNOME-FullName=GLauncher — Minecraft Launcher

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3584e4"/>
+      <stop offset="100%" style="stop-color:#1a5eb8"/>
+    </linearGradient>
+    <linearGradient id="grass" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#57e389"/>
+      <stop offset="100%" style="stop-color:#26a269"/>
+    </linearGradient>
+    <linearGradient id="dirt" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#c97c4c"/>
+      <stop offset="100%" style="stop-color:#986035"/>
+    </linearGradient>
+  </defs>
+  <!-- Background circle -->
+  <circle cx="64" cy="64" r="60" fill="url(#bg)"/>
+  <!-- Minecraft grass block, isometric-ish -->
+  <!-- Top face -->
+  <polygon points="64,28 96,44 64,60 32,44" fill="url(#grass)" opacity="0.95"/>
+  <!-- Left face -->
+  <polygon points="32,44 64,60 64,92 32,76" fill="url(#dirt)" opacity="0.9"/>
+  <!-- Right face -->
+  <polygon points="64,60 96,44 96,76 64,92" fill="#7a4a28" opacity="0.9"/>
+  <!-- Highlight on top -->
+  <polygon points="64,28 80,36 64,44 48,36" fill="white" opacity="0.08"/>
+</svg>
