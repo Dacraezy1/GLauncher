@@ -167,7 +167,7 @@ pub fn show(state: Rc<RefCell<AppState>>, window: &ApplicationWindow) {
                 Ok(account) => {
                     let username = account.username.clone();
                     {
-                        let mut st = state_c2.borrow_mut();
+                        let st = state_c2.borrow_mut();
                         let mut accounts = st.accounts.lock().unwrap();
                         accounts.add_account(account);
                         let _ = accounts.save();

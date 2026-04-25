@@ -144,7 +144,7 @@ pub async fn fetch_forge_versions(
 
 pub async fn install_forge(
     client: &reqwest::Client,
-    mc_version: &str,
+    _mc_version: &str,
     forge_version: &str,
     instance_dir: &PathBuf,
     java_path: &str,
@@ -287,7 +287,6 @@ pub async fn fetch_neoforge_versions(
         .collect();
 
     versions.reverse();
-    let len = versions.len();
 
     Ok(versions
         .into_iter()
@@ -302,7 +301,7 @@ pub async fn fetch_neoforge_versions(
 
 pub async fn install_neoforge(
     client: &reqwest::Client,
-    mc_version: &str,
+    _mc_version: &str,
     neoforge_version: &str,
     instance_dir: &PathBuf,
     java_path: &str,

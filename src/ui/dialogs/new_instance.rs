@@ -1,6 +1,6 @@
 use gtk4::prelude::*;
 use libadwaita::prelude::*;
-use gtk4::{Box, Orientation, Label, Button, Entry, ComboBoxText, ScrolledWindow, ListBox, ListBoxRow};
+use gtk4::{Box, Orientation, Button, ComboBoxText, ScrolledWindow};
 use std::rc::Rc;
 use std::cell::RefCell;
 use crate::ui::state::AppState;
@@ -174,7 +174,6 @@ pub fn show(state: &Rc<RefCell<AppState>>, window: &ApplicationWindow) {
     // Wire create
     let dialog_c = dialog.clone();
     let state_c = state.clone();
-    let window_c = window.clone();
     create_btn.connect_clicked(move |_| {
         let name = name_entry.text().to_string().trim().to_string();
         if name.is_empty() {

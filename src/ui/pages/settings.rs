@@ -1,6 +1,6 @@
 use gtk4::prelude::*;
 use libadwaita::prelude::*;
-use gtk4::{Box, Orientation, Label, Button, ScrolledWindow, Switch, SpinButton, Adjustment};
+use gtk4::{Box, Orientation, Label, Button, ScrolledWindow, SpinButton};
 use std::rc::Rc;
 use std::cell::RefCell;
 use crate::ui::state::AppState;
@@ -55,7 +55,7 @@ pub fn build(state: Rc<RefCell<AppState>>, window: &ApplicationWindow) -> gtk4::
     let state_c = state.clone();
     theme_combo.connect_changed(move |combo| {
         if let Some(id) = combo.active_id() {
-            let mut st = state_c.borrow_mut();
+            let st = state_c.borrow_mut();
             let mut config = st.config.lock().unwrap();
             config.theme = id.to_string();
             let _ = config.save();
@@ -88,7 +88,7 @@ pub fn build(state: Rc<RefCell<AppState>>, window: &ApplicationWindow) -> gtk4::
         {
             let state_c = state.clone();
             move |v| {
-                let mut st = state_c.borrow_mut();
+                let st = state_c.borrow_mut();
                 let mut config = st.config.lock().unwrap();
                 config.show_snapshots = v;
                 let _ = config.save();
@@ -104,7 +104,7 @@ pub fn build(state: Rc<RefCell<AppState>>, window: &ApplicationWindow) -> gtk4::
         {
             let state_c = state.clone();
             move |v| {
-                let mut st = state_c.borrow_mut();
+                let st = state_c.borrow_mut();
                 let mut config = st.config.lock().unwrap();
                 config.show_beta = v;
                 let _ = config.save();
@@ -120,7 +120,7 @@ pub fn build(state: Rc<RefCell<AppState>>, window: &ApplicationWindow) -> gtk4::
         {
             let state_c = state.clone();
             move |v| {
-                let mut st = state_c.borrow_mut();
+                let st = state_c.borrow_mut();
                 let mut config = st.config.lock().unwrap();
                 config.show_alpha = v;
                 let _ = config.save();
@@ -142,7 +142,7 @@ pub fn build(state: Rc<RefCell<AppState>>, window: &ApplicationWindow) -> gtk4::
         {
             let state_c = state.clone();
             move |v| {
-                let mut st = state_c.borrow_mut();
+                let st = state_c.borrow_mut();
                 let mut config = st.config.lock().unwrap();
                 config.close_on_launch = v;
                 let _ = config.save();
@@ -161,7 +161,7 @@ pub fn build(state: Rc<RefCell<AppState>>, window: &ApplicationWindow) -> gtk4::
 
     let state_c = state.clone();
     dl_spin.connect_value_changed(move |spin| {
-        let mut st = state_c.borrow_mut();
+        let st = state_c.borrow_mut();
         let mut config = st.config.lock().unwrap();
         config.concurrent_downloads = spin.value() as u32;
         let _ = config.save();
@@ -185,7 +185,7 @@ pub fn build(state: Rc<RefCell<AppState>>, window: &ApplicationWindow) -> gtk4::
     min_spin.set_valign(gtk4::Align::Center);
     let state_c = state.clone();
     min_spin.connect_value_changed(move |s| {
-        let mut st = state_c.borrow_mut();
+        let st = state_c.borrow_mut();
         let mut cfg = st.config.lock().unwrap();
         cfg.default_memory_min = s.value() as u32;
         let _ = cfg.save();
@@ -201,7 +201,7 @@ pub fn build(state: Rc<RefCell<AppState>>, window: &ApplicationWindow) -> gtk4::
     max_spin.set_valign(gtk4::Align::Center);
     let state_c = state.clone();
     max_spin.connect_value_changed(move |s| {
-        let mut st = state_c.borrow_mut();
+        let st = state_c.borrow_mut();
         let mut cfg = st.config.lock().unwrap();
         cfg.default_memory_max = s.value() as u32;
         let _ = cfg.save();
@@ -248,7 +248,7 @@ pub fn build(state: Rc<RefCell<AppState>>, window: &ApplicationWindow) -> gtk4::
 
     scroll.set_child(Some(&inner));
     vbox.append(&scroll);
-    vbox.into()
+    vbox.upcast::<gtk4::Widget>()
 }
 
 fn add_switch_row(

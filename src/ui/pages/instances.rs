@@ -4,7 +4,6 @@ use gtk4::{Box, Orientation, Label, Button, ScrolledWindow, Image, Entry};
 use std::rc::Rc;
 use std::cell::RefCell;
 use crate::ui::state::AppState;
-use crate::ui::pages::home::build_page_header;
 use libadwaita::ApplicationWindow;
 
 pub fn build(state: Rc<RefCell<AppState>>, window: &ApplicationWindow) -> gtk4::Widget {
@@ -76,7 +75,7 @@ pub fn build(state: Rc<RefCell<AppState>>, window: &ApplicationWindow) -> gtk4::
     scroll.set_child(Some(&list_box));
     vbox.append(&scroll);
 
-    vbox.into()
+    vbox.upcast::<gtk4::Widget>()
 }
 
 fn populate_instances_list(
@@ -192,7 +191,7 @@ fn build_instance_row(
         let row = row_widget.clone();
         dialog.connect_response(None, move |_, response| {
             if response == "delete" {
-                let mut st = state.borrow_mut();
+                let st = state.borrow_mut();
                 let mut instances = st.instances.lock().unwrap();
                 let _ = instances.remove(&inst_id);
                 // Remove row from parent
@@ -212,5 +211,5 @@ fn build_instance_row(
     btn_box.append(&delete_btn);
     row.add_suffix(&btn_box);
 
-    row.into()
+    row.upcast::<gtk4::Widget>()
 }

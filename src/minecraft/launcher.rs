@@ -1,8 +1,7 @@
 use anyhow::{Result, bail, Context};
 use std::path::{Path, PathBuf};
-use std::collections::HashSet;
 use tokio::sync::mpsc;
-use crate::minecraft::versions::{VersionMeta, Library, Rule};
+use crate::minecraft::versions::{VersionMeta, Library};
 use crate::minecraft::instances::Instance;
 use crate::auth::accounts::{Account, AccountType};
 use crate::utils::{paths, download};
@@ -331,7 +330,7 @@ impl GameLauncher {
 
         let assets_dir = paths::assets_dir();
         let asset_index = meta.asset_index.as_ref().map(|ai| ai.id.clone()).unwrap_or_else(|| "legacy".to_string());
-        let version_dir = paths::versions_dir().join(&instance.minecraft_version);
+        let _version_dir = paths::versions_dir().join(&instance.minecraft_version);
         let game_dir = instance.minecraft_dir();
 
         let replace = |s: &str| -> String {
@@ -410,9 +409,9 @@ impl GameLauncher {
         // Version-specified JVM args
         if let Some(arguments) = &meta.arguments {
             if let Some(jvm) = &arguments.jvm {
-                let version_dir = paths::versions_dir().join(&instance.minecraft_version);
+                let _version_dir = paths::versions_dir().join(&instance.minecraft_version);
                 let natives_str = natives_dir.to_str().unwrap_or(".");
-                let assets_dir = paths::assets_dir();
+                let _assets_dir = paths::assets_dir();
 
                 let replace = |s: &str| -> String {
                     s.replace("${natives_directory}", natives_str)

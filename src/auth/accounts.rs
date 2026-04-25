@@ -24,12 +24,8 @@ pub struct Account {
 
 impl Account {
     pub fn new_offline(username: &str) -> Self {
-        // Offline accounts use a deterministic UUID based on username (like vanilla)
-        let uuid = format!("{:x}", md5_hex(format!("OfflinePlayer:{username}")));
-        let formatted_uuid = format!(
-            "{}-{}-{}-{}-{}",
-            &uuid[..8], &uuid[8..12], &uuid[12..16], &uuid[16..20], &uuid[20..]
-        );
+        // Offline accounts use a deterministic UUID based on username (Minecraft vanilla behaviour)
+        let formatted_uuid = offline_uuid(username);
         Self {
             id: Uuid::new_v4().to_string(),
             username: username.to_string(),
@@ -62,13 +58,21 @@ impl Account {
     }
 }
 
-fn md5_hex(input: String) -> u128 {
-    use std::collections::hash_map::DefaultHasher;
-    use std::hash::{Hash, Hasher};
-    // Simple deterministic "uuid" for offline mode
-    let mut h = DefaultHasher::new();
-    input.hash(&mut h);
-    h.finish() as u128 | ((h.finish() as u128) << 64)
+/// Vanilla-compatible offline UUID: SHA-256 of "OfflinePlayer:<username>", formatted as UUID v3
+fn offline_uuid(username: &str) -> String {
+    use sha2::{Sha256, Digest};
+    let input = format!("OfflinePlayer:{username}");
+    let hash = Sha256::digest(input.as_bytes());
+    // Take first 16 bytes and format as UUID
+    let h = &hash[..16];
+    format!(
+        "{:02x}{:02x}{:02x}{:02x}-{:02x}{:02x}-{:02x}{:02x}-{:02x}{:02x}-{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}",
+        h[0], h[1], h[2], h[3],
+        h[4], h[5],
+        h[6], h[7],
+        h[8], h[9],
+        h[10], h[11], h[12], h[13], h[14], h[15]
+    )
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]

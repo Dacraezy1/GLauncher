@@ -162,8 +162,7 @@ pub fn launch_instance(
             }
             LaunchEvent::Log(line) => {
                 append_log(&log_buffer_clone, &line);
-                // Auto-scroll
-                let end = log_buffer_clone.end_iter();
+                // Auto-scroll to bottom
                 log_view_clone.scroll_to_iter(&mut log_buffer_clone.end_iter(), 0.0, false, 0.0, 1.0);
             }
             LaunchEvent::Started(pid) => {
@@ -183,7 +182,7 @@ pub fn launch_instance(
                 close_btn_clone.set_sensitive(true);
 
                 // Update play time
-                let mut st = dialog_state.borrow_mut();
+                let st = dialog_state.borrow_mut();
                 let mut instances = st.instances.lock().unwrap();
                 if let Some(inst) = instances.get_mut(&inst_id_for_time) {
                     inst.play_time_seconds += elapsed;

@@ -4,7 +4,7 @@ use gtk4::{Box, Orientation, Label, Button, ScrolledWindow, Image, Entry};
 use std::rc::Rc;
 use std::cell::RefCell;
 use crate::ui::state::AppState;
-use crate::auth::accounts::{Account, AccountType};
+use crate::auth::accounts::Account;
 use libadwaita::ApplicationWindow;
 
 pub fn build(state: Rc<RefCell<AppState>>, window: &ApplicationWindow) -> gtk4::Widget {
@@ -111,7 +111,7 @@ pub fn build(state: Rc<RefCell<AppState>>, window: &ApplicationWindow) -> gtk4::
 
         let account = Account::new_offline(&username);
         {
-            let mut st = state_c.borrow_mut();
+            let st = state_c.borrow_mut();
             let mut accounts = st.accounts.lock().unwrap();
             accounts.add_account(account);
             let _ = accounts.save();
@@ -138,7 +138,7 @@ pub fn build(state: Rc<RefCell<AppState>>, window: &ApplicationWindow) -> gtk4::
 
     scroll.set_child(Some(&inner));
     vbox.append(&scroll);
-    vbox.into()
+    vbox.upcast::<gtk4::Widget>()
 }
 
 fn populate_accounts_group(
@@ -184,7 +184,7 @@ fn populate_accounts_group(
             let acct_id = account.id.clone();
             let state_c = state.clone();
             select_btn.connect_clicked(move |_| {
-                let mut st = state_c.borrow_mut();
+                let st = state_c.borrow_mut();
                 let mut accts = st.accounts.lock().unwrap();
                 accts.set_active(&acct_id);
                 let _ = accts.save();
@@ -215,7 +215,7 @@ fn populate_accounts_group(
             let state_c = state_c.clone();
             dialog.connect_response(None, move |_, resp| {
                 if resp == "remove" {
-                    let mut st = state_c.borrow_mut();
+                    let st = state_c.borrow_mut();
                     let mut accts = st.accounts.lock().unwrap();
                     accts.remove_account(&acct_id);
                     let _ = accts.save();

@@ -180,7 +180,7 @@ impl CurseForgeClient {
     }
 
     /// CurseForge sometimes withholds download URLs. This tries to construct it.
-    pub fn get_download_url(file: &CurseForgeFile, mod_id: u64) -> String {
+    pub fn get_download_url(file: &CurseForgeFile, _mod_id: u64) -> String {
         if let Some(url) = &file.download_url {
             return url.clone();
         }

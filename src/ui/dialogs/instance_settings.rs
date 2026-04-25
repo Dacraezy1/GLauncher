@@ -1,6 +1,6 @@
 use gtk4::prelude::*;
 use libadwaita::prelude::*;
-use gtk4::{Box, Orientation, Label, Button, Entry, ScrolledWindow};
+use gtk4::{Box, Orientation, Button, ScrolledWindow};
 use std::rc::Rc;
 use std::cell::RefCell;
 use crate::ui::state::AppState;
@@ -195,7 +195,7 @@ pub fn show(instance_id: &str, state: Rc<RefCell<AppState>>, window: &Applicatio
     let inst_id = instance.id.clone();
 
     save_btn.connect_clicked(move |_| {
-        let mut st = state_c.borrow_mut();
+        let st = state_c.borrow_mut();
         let mut instances = st.instances.lock().unwrap();
 
         if let Some(inst) = instances.get_mut(&inst_id) {

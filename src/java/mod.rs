@@ -231,7 +231,7 @@ impl JavaManager {
     }
 
     /// Pick the best Java for a given Minecraft version
-    pub fn pick_java_for_mc(&self, mc_major_java: Option<u32>, installs: &[JavaInstall]) -> Option<&JavaInstall> {
+    pub fn pick_java_for_mc<'a>(&self, mc_major_java: Option<u32>, installs: &'a [JavaInstall]) -> Option<&'a JavaInstall> {
         let required = mc_major_java.unwrap_or(8);
         // Prefer exact match, then compatible higher version
         installs.iter()

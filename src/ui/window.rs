@@ -1,7 +1,7 @@
 use gtk4::prelude::*;
 use libadwaita::prelude::*;
-use libadwaita::{Application, ApplicationWindow, HeaderBar, NavigationView, NavigationPage};
-use gtk4::{Box, Orientation, Stack, StackSwitcher, ScrolledWindow, Label, Button, Image};
+use libadwaita::{Application, ApplicationWindow};
+use gtk4::{Box, Orientation, Stack, Label, Image};
 use std::rc::Rc;
 use std::cell::RefCell;
 

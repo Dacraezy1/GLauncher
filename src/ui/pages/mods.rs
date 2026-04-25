@@ -1,6 +1,6 @@
 use gtk4::prelude::*;
 use libadwaita::prelude::*;
-use gtk4::{Box, Orientation, Label, Button, ScrolledWindow, Image, Entry, ComboBoxText, Stack};
+use gtk4::{Box, Orientation, Label, Button, ScrolledWindow, Image, Entry, ComboBoxText};
 use std::rc::Rc;
 use std::cell::RefCell;
 use crate::ui::state::AppState;
@@ -106,7 +106,7 @@ pub fn build(state: Rc<RefCell<AppState>>, window: &ApplicationWindow) -> gtk4::
     placeholder.set_margin_top(32);
     placeholder.set_wrap(true);
     placeholder.set_justify(gtk4::Justification::Center);
-    results_list.append(&placeholder.into());
+    results_list.append(&placeholder);
 
     scroll.set_child(Some(&results_list));
     vbox.append(&scroll);
@@ -131,8 +131,6 @@ pub fn build(state: Rc<RefCell<AppState>>, window: &ApplicationWindow) -> gtk4::
         let results_list = results_list_clone.clone();
         let window = window_clone.clone();
 
-        let rt = tokio::runtime::Handle::try_current();
-
         if source == "modrinth" {
             perform_modrinth_search(query, instance_id, state, results_list, window);
         } else {
@@ -140,7 +138,7 @@ pub fn build(state: Rc<RefCell<AppState>>, window: &ApplicationWindow) -> gtk4::
         }
     });
 
-    vbox.into()
+    vbox.upcast::<gtk4::Widget>()
 }
 
 fn perform_modrinth_search(
@@ -158,7 +156,7 @@ fn perform_modrinth_search(
     let loading = Label::new(Some("Searching..."));
     loading.add_css_class("dim-label");
     loading.set_margin_top(24);
-    results_list.append(&loading.into());
+    results_list.append(&loading);
 
     let http_client = state.borrow().http_client.clone();
 
@@ -219,7 +217,7 @@ fn perform_modrinth_search(
                 let lbl = Label::new(Some("No results found"));
                 lbl.add_css_class("dim-label");
                 lbl.set_margin_top(24);
-                results_list.append(&lbl.into());
+                results_list.append(&lbl);
             }
             Ok(hits) => {
                 for project in hits {
@@ -231,7 +229,7 @@ fn perform_modrinth_search(
                 let lbl = Label::new(Some(&format!("Error: {e}")));
                 lbl.add_css_class("error");
                 lbl.set_margin_top(24);
-                results_list.append(&lbl.into());
+                results_list.append(&lbl);
             }
         }
 
@@ -257,28 +255,6 @@ fn build_mod_row(
     let icon = Image::from_icon_name("package-x-generic-symbolic");
     icon.set_pixel_size(36);
     row.add_prefix(&icon);
-
-    // Load remote icon if available
-    if let Some(icon_url) = &project.icon_url {
-        let icon_url = icon_url.clone();
-        let icon_widget = icon.clone();
-        glib::MainContext::default().spawn_local(async move {
-            if let Ok(client) = crate::utils::download::build_http_client() {
-                if let Ok(resp) = client.get(&icon_url).send().await {
-                    if let Ok(bytes) = resp.bytes().await {
-                        let loader = gdk_pixbuf::PixbufLoader::new();
-                        let _ = loader.write(&bytes);
-                        let _ = loader.close();
-                        if let Some(pixbuf) = loader.pixbuf() {
-                            if let Some(scaled) = pixbuf.scale_simple(36, 36, gdk_pixbuf::InterpType::Bilinear) {
-                                icon_widget.set_from_pixbuf(Some(&scaled));
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
 
     // Download button
     let dl_btn = Button::new();
@@ -331,12 +307,12 @@ fn build_mod_row(
     btn_box.append(&dl_btn);
     row.add_suffix(&btn_box);
 
-    row.into()
+    row.upcast::<gtk4::Widget>()
 }
 
 fn download_mod_to_instance(
     project_id: String,
-    project_title: String,
+    _project_title: String,
     instance_id: String,
     state: Rc<RefCell<AppState>>,
     window: &ApplicationWindow,
@@ -370,12 +346,7 @@ fn download_mod_to_instance(
     };
 
     let http_client = state.borrow().http_client.clone();
-    let window_clone = window.clone();
 
-    let toast = libadwaita::Toast::new(&format!("Downloading {}...", project_title));
-    toast.set_timeout(3);
-
-    // Show overlay toast if available
     let (tx, rx) = glib::MainContext::channel::<Result<String, String>>(glib::Priority::DEFAULT);
 
     std::thread::spawn(move || {
@@ -400,13 +371,20 @@ fn download_mod_to_instance(
         let _ = tx.send(result.map_err(|e| e.to_string()));
     });
 
+    let window_clone2 = window.clone();
     rx.attach(None, move |result| {
-        let toast = match result {
-            Ok(filename) => libadwaita::Toast::new(&format!("Downloaded {filename}")),
-            Err(e) => libadwaita::Toast::new(&format!("Download failed: {e}")),
+        let msg = match result {
+            Ok(filename) => format!("Downloaded: {filename}"),
+            Err(e) => format!("Download failed: {e}"),
         };
-        toast.set_timeout(4);
-        // Find toast overlay in window
+        log::info!("{msg}");
+        let dialog = libadwaita::MessageDialog::new(
+            Some(&window_clone2),
+            Some("Mod Download"),
+            Some(&msg),
+        );
+        dialog.add_response("ok", "OK");
+        dialog.present();
         glib::ControlFlow::Break
     });
 }
@@ -422,7 +400,7 @@ fn show_curseforge_api_key_notice(results_list: &gtk4::ListBox) {
     lbl.set_margin_top(24);
     lbl.set_wrap(true);
     lbl.set_justify(gtk4::Justification::Center);
-    results_list.append(&lbl.into());
+    results_list.append(&lbl);
 }
 
 fn format_number(n: u64) -> String {

@@ -34,7 +34,7 @@ pub fn build(state: Rc<RefCell<AppState>>, window: &ApplicationWindow) -> gtk4::
 
     scroll.set_child(Some(&content));
     vbox.append(&scroll);
-    vbox.into()
+    vbox.upcast::<gtk4::Widget>()
 }
 
 fn build_welcome_banner() -> gtk4::Widget {
@@ -83,7 +83,7 @@ fn build_welcome_banner() -> gtk4::Widget {
     card.append(&desc);
     card.append(&links_box);
 
-    card.into()
+    card.upcast::<gtk4::Widget>()
 }
 
 fn build_recent_instances_section(
@@ -117,7 +117,7 @@ fn build_recent_instances_section(
     }
 
     section.append(&instances_box);
-    section.into()
+    section.upcast::<gtk4::Widget>()
 }
 
 fn build_instance_quick_row(
@@ -178,7 +178,7 @@ fn build_instance_quick_row(
     card.append(&info);
     card.append(&play_btn);
 
-    card.into()
+    card.upcast::<gtk4::Widget>()
 }
 
 pub fn build_page_header(title: &str, subtitle: &str) -> gtk4::Widget {
@@ -205,5 +205,5 @@ pub fn build_page_header(title: &str, subtitle: &str) -> gtk4::Widget {
     sep.set_margin_top(12);
     header.append(&sep);
 
-    header.into()
+    header.upcast::<gtk4::Widget>()
 }
